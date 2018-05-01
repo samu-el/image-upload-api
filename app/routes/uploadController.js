@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -18,18 +17,19 @@ var storage = multer.diskStorage({
 
 var upload = multer({
     storage: storage,
+    limits:{
+        files: 1,
+        fileSize: 1024 * 1024 * 2
+    },
     fileFilter: (req, file, cb)=>{
-        var ext = path.extname(file.originalname);
-        if(ext !== '.png' && ext !== '.jpg' && ext !== '.jpeg' && 
-            ext !== '.gif' && ext !== '.bmp', ext !== '.tiff') {
-             cb(null, false);
+        var ext = file.mimetype.split('/')[0];
+        console.log(ext);
+        if(ext != 'image') {
+            cb(new Error("File is not an image"));
         }
         cb(null, true);
     }
 });
-
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
 
 router.get('/', (req, res)=>{
     Image.find((err, result)=>{
@@ -45,9 +45,12 @@ router.get('/', (req, res)=>{
 });
 
 router.post('/', upload.single('image'), (req, res, next)=>{
+    var user = "user";
     Image.create({
         name: req.file.filename,
-        owner: "",
+        original_name: req.file.originalname,
+        file_size: req.file.size,
+        owner: user,
         uploaded: new Date()
     }, (err, image)=>{
         if (err) return res.status(500).json({
@@ -57,7 +60,7 @@ router.post('/', upload.single('image'), (req, res, next)=>{
         res.status(200).json({
             success: true,
             path: "/api/upload/"+image._id,
-            //image: image                         
+            image: image                         
         });
     });
 
@@ -69,6 +72,10 @@ router.get('/:id', (req, res)=>{
         if (err) return res.status(500).json({
             success: false,
             message: "error retrieving image"
+        });
+        if (!result) return res.status(500).json({
+            success: false,
+            message: "error locating image"
         });
         res.sendFile(path.resolve(__dirname, "../../public/images/uploads/"+result.name));
     });

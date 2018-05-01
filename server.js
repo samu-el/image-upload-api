@@ -11,8 +11,13 @@ app.use(logger("short"));
 app.use(express.static(path.resolve(__dirname, "public")));
 
 app.use('/api/upload', UploadController);
-
-mongoose.connect('mongodb://localhost:27017/imagedb');
+app.use((err, req, res, next)=>{
+    res.status(500).json({
+        success: false,
+        message: err.message
+    });
+});
+mongoose.connect('mongodb://localhost:27017/shimeta_image_upload');
 
 app.listen(3000, ()=>{
     console.log("server started");
