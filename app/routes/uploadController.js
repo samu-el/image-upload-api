@@ -58,22 +58,3 @@ router.get('/:id', (req, res)=>{
     });
 });
 
-router.put('/:id', (req, res)=>{
-    var id = req.params.id;
-    Image.findByIdAndUpdate(id, {
-        name: "new name",
-        owner: "new owner",
-        uploaded: new Date()
-    },{ new: true}, (err, result)=>{
-        if (err) return res.status(500).json({
-            success: false,
-            message: "error retrieving images"
-        });
-        res.status(200).json({
-            success: true,
-            images: result
-        });
-    });
-});
-module.exports = router;
-
