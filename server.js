@@ -17,8 +17,8 @@ app.use((err, req, res, next)=>{
         message: err.message
     });
 });
-mongoose.connect('mongodb://localhost:27017/shimeta_image_upload');
+mongoose.connect(process.env.DB);
 
-app.listen(3000, ()=>{
-    console.log("server started");
+app.listen(process.env.PORT, ()=>{
+    console.log("server started at port " + process.env.PORT);
 });

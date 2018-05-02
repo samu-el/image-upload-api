@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const Image= require('../models/Image');
+const Image = require('../models/Image');
 var router = express.Router();
 
 var storage = multer.diskStorage({
