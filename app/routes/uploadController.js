@@ -23,13 +23,12 @@ var upload = multer({
     },
     fileFilter: (req, file, cb)=>{
         var ext = file.mimetype.split('/')[0];
-        console.log(ext);
-        if(ext != 'image') {
-            cb(new Error("File is not an image"));
+        if(ext !== 'image') {
+            return cb(new Error("File is not an image"), false);
         }
         cb(null, true);
     }
-});
+}).single("image");
 
 router.get('/', (req, res)=>{
     Image.find((err, result)=>{
@@ -44,26 +43,32 @@ router.get('/', (req, res)=>{
     });
 });
 
-router.post('/', upload.single('image'), (req, res, next)=>{
+router.post('/', (req, res, next)=>{
     var user = "user";
-    Image.create({
-        name: req.file.filename,
-        original_name: req.file.originalname,
-        file_size: req.file.size,
-        owner: user,
-        uploaded: new Date()
-    }, (err, image)=>{
-        if (err) return res.status(500).json({
+    upload(req, res, (err)=>{
+        if(err) return res.status(400).json({
             success: false,
-            message: "error uploading image"
+            message: err.message
         });
-        res.status(200).json({
-            success: true,
-            path: "/api/upload/"+image._id,
-            image: image                         
+    
+        Image.create({
+            name: req.file.filename,
+            original_name: req.file.originalname,
+            file_size: req.file.size,
+            owner: user,
+            uploaded: new Date()
+        }, (err, image)=>{
+            if (err) return res.status(500).json({
+                success: false,
+                message: "error uploading image"
+            });
+            res.status(200).json({
+                success: true,
+                path: "/api/upload/"+image._id,
+                image: image                         
+            });
         });
     });
-
 });
 
 router.get('/:id', (req, res)=>{
