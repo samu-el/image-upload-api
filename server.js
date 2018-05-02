@@ -19,6 +19,8 @@ app.use((err, req, res, next)=>{
 });
 mongoose.connect(process.env.DB);
 
-app.listen(process.env.PORT, ()=>{
-    console.log("server started at port " + process.env.PORT);
+var port = process.env.PORT || 3000;
+
+app.listen(port, ()=>{
+    console.log("server started at port " + port);
 });
